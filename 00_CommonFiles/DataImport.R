@@ -19,9 +19,15 @@ process_data <- function(file_path) {
       cw_diff = as.numeric(cw_end) - as.numeric(cw_start),
       mass_diff = as.numeric(mass_end) - as.numeric(mass_start),
       cw_percent = (as.numeric(cw_end) - as.numeric(cw_start)) / as.numeric(cw_start),
-      mass_percent = (as.numeric(mass_end) - as.numeric(mass_start)) / as.numeric(mass_start)
+      mass_percent = (as.numeric(mass_end) - as.numeric(mass_start)) / as.numeric(mass_start)/
+      as.numeric(mass_start),
+      time_to_molt = as.numeric(difftime(as.Date(molt_date, format = "%m/%d/%Y"),
+                                         as.Date(start_date, format = "%m/%d/%Y"),
+                                         units = "days"))
+      
     )
 }
+
 
 # Import and process each dataset
 dat_expt1 <- process_data("00_CommonFiles/Data/dat_expt1_food.csv")

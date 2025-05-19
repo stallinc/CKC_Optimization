@@ -7,7 +7,8 @@ editor_options:
 
 # Project information
 
-Title: Optimization of grow‐out culture of Caribbean king crab Funder: Gulf States Marine Fisheries Commission Award number: NA20NMF4540293 (subcontract ACQ-210-039-2023-USF)
+Title: Optimization of grow‐out culture of Caribbean king crab 
+Funder: Gulf States Marine Fisheries Commission Award number: NA20NMF4540293 (subcontract ACQ-210-039-2023-USF)
 
 PI(s): Christopher Stallings and Fredrick Stengard
 
@@ -30,7 +31,7 @@ source("00_CommonFiles/DataImport.R")
 ```
 
 # Visualization
-## Change in size
+## Change in size and time to molt
 ```{r}
 # Function for carapace width plots
 plot_cw <- function(df, df_title) {
@@ -42,15 +43,15 @@ plot_cw <- function(df, df_title) {
 
   p2 <- ggplot(df, aes(x = sex, y = cw_diff)) +
     geom_boxplot() +
-    labs(title = df_title, x = "sex", y = "Change in carapace width (mm)")
+    labs(x = "sex", y = "Change in carapace width (mm)")
 
   p3 <- ggplot(df, aes(x = ttt, y = cw_percent)) +
     geom_boxplot() +
-    labs(title = df_title, x = "ttt", y = "Percent change in carapace width")
+    labs(x = "ttt", y = "Percent change in carapace width")
 
   p4 <- ggplot(df, aes(x = sex, y = cw_percent)) +
     geom_boxplot() +
-    labs(title = df_title, x = "sex", y = "Percent change in carapace width")
+    labs(x = "sex", y = "Percent change in carapace width")
 
   (p1 | p2) / (p3 | p4)
 }
@@ -65,38 +66,59 @@ plot_mass <- function(df, df_title) {
 
   p2 <- ggplot(df, aes(x = sex, y = mass_diff)) +
     geom_boxplot() +
-    labs(title = df_title, x = "sex", y = "Change in mass (g)")
+    labs(x = "sex", y = "Change in mass (g)")
 
   p3 <- ggplot(df, aes(x = ttt, y = mass_percent)) +
     geom_boxplot() +
-    labs(title = df_title, x = "ttt", y = "Percent change in mass")
+    labs(x = "ttt", y = "Percent change in mass")
 
   p4 <- ggplot(df, aes(x = sex, y = mass_percent)) +
     geom_boxplot() +
-    labs(title = df_title, x = "sex", y = "Percent change in mass")
+    labs(x = "sex", y = "Percent change in mass")
 
   (p1 | p2) / (p3 | p4)
 }
 
-# Carapace width plots
+# Function for time to molt plots
+plot_time_to_molt <- function(df, df_title) {
+  df <- df %>% drop_na(time_to_molt, ttt, sex)
+
+  p1 <- ggplot(df, aes(x = ttt, y = time_to_molt)) +
+    geom_boxplot() +
+    labs(title = df_title, x = "ttt", y = "Time to molt (days)")
+
+  p2 <- ggplot(df, aes(x = sex, y = time_to_molt)) +
+    geom_boxplot() +
+    labs(x = "sex", y = "Time to molt (days)")
+
+  p1 | p2
+}
+
+# Generate plots
 plot_cw(dat_expt1, "Experiment 1: food")
 plot_cw(dat_expt2, "Experiment 2: photoperiod")
 plot_cw(dat_expt3, "Experiment 3: space")
 
-# Mass plots
 plot_mass(dat_expt1, "Experiment 1: food")
 plot_mass(dat_expt2, "Experiment 2: photoperiod")
 plot_mass(dat_expt3, "Experiment 3: space")
 
-# Save carapace width plots
+plot_time_to_molt(dat_expt1, "Experiment 1: food")
+plot_time_to_molt(dat_expt2, "Experiment 2: photoperiod")
+plot_time_to_molt(dat_expt3, "Experiment 3: space")
+
+# Save plots
 ggsave("03_Figures/cw_diff_expt1.png", plot_cw(dat_expt1, "Experiment 1: food"), width = 10, height = 8, dpi = 300)
 ggsave("03_Figures/cw_diff_expt2.png", plot_cw(dat_expt2, "Experiment 2: photoperiod"), width = 10, height = 8, dpi = 300)
 ggsave("03_Figures/cw_diff_expt3.png", plot_cw(dat_expt3, "Experiment 3: space"), width = 10, height = 8, dpi = 300)
 
-# Save mass plots
 ggsave("03_Figures/mass_diff_expt1.png", plot_mass(dat_expt1, "Experiment 1: food"), width = 10, height = 8, dpi = 300)
 ggsave("03_Figures/mass_diff_expt2.png", plot_mass(dat_expt2, "Experiment 2: photoperiod"), width = 10, height = 8, dpi = 300)
 ggsave("03_Figures/mass_diff_expt3.png", plot_mass(dat_expt3, "Experiment 3: space"), width = 10, height = 8, dpi = 300)
+
+ggsave("03_Figures/time_to_molt_expt1.png", plot_time_to_molt(dat_expt1, "Experiment 1: food"), width = 8, height = 6, dpi = 300)
+ggsave("03_Figures/time_to_molt_expt2.png", plot_time_to_molt(dat_expt2, "Experiment 2: photoperiod"), width = 8, height = 6, dpi = 300)
+ggsave("03_Figures/time_to_molt_expt3.png", plot_time_to_molt(dat_expt3, "Experiment 3: space"), width = 8, height = 6, dpi = 300)
 
 ```
 
@@ -127,12 +149,22 @@ ggsave("03_Figures/molt_expt1.png", plot_molt_by_ttt(dat_expt1, "Experiment 1: f
 ggsave("03_Figures/molt_expt2.png", plot_molt_by_ttt(dat_expt2, "Experiment 2: photoperiod"), width = 8, height = 6, dpi = 300)
 ggsave("03_Figures/molt_expt3.png", plot_molt_by_ttt(dat_expt3, "Experiment 3: space"), width = 8, height = 6, dpi = 300)
 
+# ad hoc tests for proportions
+dat_expt3$ttt <- factor(dat_expt3$ttt)  # ensure it's a factor
+dat_expt3$ttt <- relevel(dat_expt3$ttt, ref = "B")  # set B as the reference
+
+model_bc <- glm(molt ~ ttt, family = binomial, data = dat_expt3)
+summary(model_bc)
+
 ```
 
 # Analyses
 
-## Check distributions and assumptions of parametric t-tools
+## Check distributions and assumptions of parametric t-tools 
 ```{r}
+# Load required package
+library(car)  # for Levene's Test
+
 # Function to check assumptions and save results
 check_assumptions <- function(data, group_var, test_vars, dataset_name) {
   results <- list()
@@ -182,8 +214,8 @@ check_assumptions <- function(data, group_var, test_vars, dataset_name) {
   return(output)
 }
 
-# Variables to test
-test_vars <- c("cw_diff", "cw_percent", "mass_diff", "mass_percent")
+# Variables to test (including time_to_molt)
+test_vars <- c("cw_diff", "cw_percent", "mass_diff", "mass_percent", "time_to_molt")
 
 # Run checks and collect results
 results1 <- check_assumptions(dat_expt1, "ttt", test_vars, "dat_expt1")
@@ -200,15 +232,13 @@ if (!dir.exists(output_dir)) dir.create(output_dir)
 # Write to file
 writeLines(all_results, file.path(output_dir, "growth_diagnostics.txt"))
 
-# Most of the tests showed at least one group violated the assumption
-# of normality, so we will use non-parametric tests for all analyses
-
+# The growth tests and _expt2 time_to_molt showed at least one group violated the assumption of normality, so we will use non-parametric tests for those analyses; time_to_molt _expt1 and _expt3 were normal with equal variance , so we can use parametric tests for those analyses
 ```
 
-## Change in size
+## Change in size & time to molt
 ```{r}
-# Function to run non-parametric tests and collect full results
-run_nonparametric_tests <- function(data, group_var, test_vars, dataset_name) {
+# Function to run parametric or non-parametric tests based on assumptions
+run_mixed_tests <- function(data, group_var, test_vars, dataset_name, assumptions) {
   results <- list()
   
   for (var in test_vars) {
@@ -216,38 +246,72 @@ run_nonparametric_tests <- function(data, group_var, test_vars, dataset_name) {
     df <- na.omit(df)
     n_levels <- length(unique(df[[group_var]]))
     
-    if (n_levels == 2) {
-      test <- wilcox.test(as.formula(paste(var, "~", group_var)), data = df)
-    } else if (n_levels > 2) {
-      test <- kruskal.test(as.formula(paste(var, "~", group_var)), data = df)
-    } else {
-      test <- NULL
-    }
+    # Determine test type from assumptions
+    use_parametric <- assumptions[[dataset_name]][[var]]$parametric
     
-    if (!is.null(test)) {
-      test_output <- capture.output(print(test))
-    } else {
+    if (n_levels < 2) {
       test_output <- "Not enough groups to run test"
+    } else if (use_parametric) {
+      if (n_levels == 2) {
+        test <- t.test(as.formula(paste(var, "~", group_var)), data = df)
+        test_output <- capture.output(print(test))
+      } else {
+        test <- aov(as.formula(paste(var, "~", group_var)), data = df)
+        test_output <- capture.output(summary(test))
+      }
+      header <- paste0("--- ", var, " (Parametric) ---")
+    } else {
+      if (n_levels == 2) {
+        test <- wilcox.test(as.formula(paste(var, "~", group_var)), data = df)
+      } else {
+        test <- kruskal.test(as.formula(paste(var, "~", group_var)), data = df)
+      }
+      test_output <- capture.output(print(test))
+      header <- paste0("--- ", var, " (Non-Parametric) ---")
     }
     
-    results[[var]] <- test_output
+    results[[var]] <- c(header, test_output)
   }
   
-  # Format results for output
-  output <- c(paste0("=== Non-Parametric Test Results for ", dataset_name, " ===\n"))
+  output <- c(paste0("=== Test Results for ", dataset_name, " ===\n"))
   for (var in names(results)) {
-    output <- c(output, paste0("\n--- ", var, " ---"), results[[var]])
+    output <- c(output, results[[var]])
   }
   return(output)
 }
 
+# Define which variables meet parametric assumptions
+assumptions <- list(
+  dat_expt1 = list(
+    cw_diff = list(parametric = FALSE),
+    cw_percent = list(parametric = TRUE),
+    mass_diff = list(parametric = FALSE),
+    mass_percent = list(parametric = FALSE),
+    time_to_molt = list(parametric = TRUE)
+  ),
+  dat_expt2 = list(
+    cw_diff = list(parametric = TRUE),
+    cw_percent = list(parametric = TRUE),
+    mass_diff = list(parametric = FALSE),
+    mass_percent = list(parametric = FALSE),
+    time_to_molt = list(parametric = FALSE)
+  ),
+  dat_expt3 = list(
+    cw_diff = list(parametric = FALSE),
+    cw_percent = list(parametric = FALSE),
+    mass_diff = list(parametric = TRUE),
+    mass_percent = list(parametric = TRUE),
+    time_to_molt = list(parametric = TRUE)
+  )
+)
+
 # Variables to test
-test_vars <- c("cw_diff", "cw_percent", "mass_diff", "mass_percent")
+test_vars <- c("cw_diff", "cw_percent", "mass_diff", "mass_percent", "time_to_molt")
 
 # Run tests and collect results
-results1 <- run_nonparametric_tests(dat_expt1, "ttt", test_vars, "dat_expt1")
-results2 <- run_nonparametric_tests(dat_expt2, "ttt", test_vars, "dat_expt2")
-results3 <- run_nonparametric_tests(dat_expt3, "ttt", test_vars, "dat_expt3")
+results1 <- run_mixed_tests(dat_expt1, "ttt", test_vars, "dat_expt1", assumptions)
+results2 <- run_mixed_tests(dat_expt2, "ttt", test_vars, "dat_expt2", assumptions)
+results3 <- run_mixed_tests(dat_expt3, "ttt", test_vars, "dat_expt3", assumptions)
 
 # Combine all results
 all_results <- c(results1, "\n\n", results2, "\n\n", results3)
