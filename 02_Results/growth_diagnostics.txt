@@ -1,0 +1,204 @@
+=== Assumption Checks for dat_expt1 ===
+
+
+--- cw_diff ---
+
+Shapiro-Wilk Normality Test:
+Group:  - p-value: 0.9557
+Group:  - p-value: 0.0748
+
+Levene's Test for Homogeneity of Variance:
+Levene's Test for Homogeneity of Variance (center = median)
+      Df F value Pr(>F)
+group  1  0.0049 0.9448
+      32               
+
+--- cw_percent ---
+
+Shapiro-Wilk Normality Test:
+Group:  - p-value: 0.12004
+Group:  - p-value: 0.99362
+
+Levene's Test for Homogeneity of Variance:
+Levene's Test for Homogeneity of Variance (center = median)
+      Df F value Pr(>F)
+group  1    0.34 0.5639
+      32               
+
+--- mass_diff ---
+
+Shapiro-Wilk Normality Test:
+Group:  - p-value: 0.01691
+Group:  - p-value: 0.24984
+
+Levene's Test for Homogeneity of Variance:
+Levene's Test for Homogeneity of Variance (center = median)
+      Df F value Pr(>F)
+group  1  0.2659 0.6096
+      32               
+
+--- mass_percent ---
+
+Shapiro-Wilk Normality Test:
+Group:  - p-value: 0.00213
+Group:  - p-value: 0.61413
+
+Levene's Test for Homogeneity of Variance:
+Levene's Test for Homogeneity of Variance (center = median)
+      Df F value  Pr(>F)  
+group  1  2.9073 0.09787 .
+      32                  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+--- time_to_molt ---
+
+Shapiro-Wilk Normality Test:
+Group:  - p-value: 0.34734
+Group:  - p-value: 0.79734
+
+Levene's Test for Homogeneity of Variance:
+Levene's Test for Homogeneity of Variance (center = median)
+      Df F value Pr(>F)
+group  1  0.1168 0.7348
+      32               
+
+
+
+=== Assumption Checks for dat_expt2 ===
+
+
+--- cw_diff ---
+
+Shapiro-Wilk Normality Test:
+Group:  - p-value: 0.14659
+Group:  - p-value: 0.90116
+Group:  - p-value: 0.06229
+
+Levene's Test for Homogeneity of Variance:
+Levene's Test for Homogeneity of Variance (center = median)
+      Df F value Pr(>F)
+group  2   1.982 0.1496
+      45               
+
+--- cw_percent ---
+
+Shapiro-Wilk Normality Test:
+Group:  - p-value: 0.75021
+Group:  - p-value: 0.99085
+Group:  - p-value: 0.82455
+
+Levene's Test for Homogeneity of Variance:
+Levene's Test for Homogeneity of Variance (center = median)
+      Df F value Pr(>F)
+group  2  1.6939 0.1953
+      45               
+
+--- mass_diff ---
+
+Shapiro-Wilk Normality Test:
+Group:  - p-value: 1e-04
+Group:  - p-value: 0.94727
+Group:  - p-value: 0.21113
+
+Levene's Test for Homogeneity of Variance:
+Levene's Test for Homogeneity of Variance (center = median)
+      Df F value Pr(>F)
+group  2  0.5882 0.5598
+      42               
+
+--- mass_percent ---
+
+Shapiro-Wilk Normality Test:
+Group:  - p-value: 0.21953
+Group:  - p-value: 0.25417
+Group:  - p-value: 0.03037
+
+Levene's Test for Homogeneity of Variance:
+Levene's Test for Homogeneity of Variance (center = median)
+      Df F value Pr(>F)
+group  2  1.5468 0.2248
+      42               
+
+--- time_to_molt ---
+
+Shapiro-Wilk Normality Test:
+Group:  - p-value: 0.00528
+Group:  - p-value: 0.63122
+Group:  - p-value: 0.11678
+
+Levene's Test for Homogeneity of Variance:
+Levene's Test for Homogeneity of Variance (center = median)
+      Df F value Pr(>F)
+group  2  1.4794 0.2378
+      49               
+
+
+
+=== Assumption Checks for dat_expt3 ===
+
+
+--- cw_diff ---
+
+Shapiro-Wilk Normality Test:
+Group:  - p-value: 0.8626
+Group:  - p-value: 0.03951
+Group:  - p-value: 0.63043
+
+Levene's Test for Homogeneity of Variance:
+Levene's Test for Homogeneity of Variance (center = median)
+      Df F value Pr(>F)
+group  2  0.0067 0.9933
+      27               
+
+--- cw_percent ---
+
+Shapiro-Wilk Normality Test:
+Group:  - p-value: 0.33647
+Group:  - p-value: 0.00371
+Group:  - p-value: 0.37681
+
+Levene's Test for Homogeneity of Variance:
+Levene's Test for Homogeneity of Variance (center = median)
+      Df F value Pr(>F)
+group  2  0.0651 0.9372
+      27               
+
+--- mass_diff ---
+
+Shapiro-Wilk Normality Test:
+Group:  - p-value: 0.75572
+Group:  - p-value: 0.75678
+Group:  - p-value: 0.20512
+
+Levene's Test for Homogeneity of Variance:
+Levene's Test for Homogeneity of Variance (center = median)
+      Df F value Pr(>F)
+group  2  1.5846 0.2242
+      26               
+
+--- mass_percent ---
+
+Shapiro-Wilk Normality Test:
+Group:  - p-value: 0.76337
+Group:  - p-value: 0.80904
+Group:  - p-value: 0.34013
+
+Levene's Test for Homogeneity of Variance:
+Levene's Test for Homogeneity of Variance (center = median)
+      Df F value Pr(>F)
+group  2  0.8052 0.4579
+      26               
+
+--- time_to_molt ---
+
+Shapiro-Wilk Normality Test:
+Group:  - p-value: 0.10964
+Group:  - p-value: 0.78867
+Group:  - p-value: 0.29936
+
+Levene's Test for Homogeneity of Variance:
+Levene's Test for Homogeneity of Variance (center = median)
+      Df F value Pr(>F)
+group  2  1.1826 0.3213
+      28               

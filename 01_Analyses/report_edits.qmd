@@ -1,0 +1,304 @@
+---
+title: "report_edits"
+format: html
+editor: visual
+---
+
+# Project information
+
+Title: Optimization of grow‐out culture of Caribbean king crab Funder: Gulf States Marine Fisheries Commission Award number: NA20NMF4540293 (subcontract ACQ-210-039-2023-USF)
+
+PI(s): Christopher Stallings and Fredrick Stengard
+
+Code developer(s): Christopher Stallings Origination Date: 2025-07-31
+
+This code is to fix issues we were having with several plots made in the main qmd file.
+
+# Packages and parameters
+
+```{r}
+# Load required packages
+library(tidyverse)  # for data manipulation and visualization
+library(patchwork) # for arranging plots
+library(dplyr) # for data manipulation
+library(car) # for Levene's Test
+library(ResourceSelection)  # for Hosmer-Lemeshow test
+library(pscl)               # for pseudo R²
+library(pROC)               # for ROC curve and AUC
+library(ggplot2)
+
+setwd("C:/Users/stallings/Box/1-Professional/Students/1a - Active Fish Lab/2. Stengard/1. Stengard_SWC/Funding/SCMFC 2022/CKC_Experiments")
+# Import data
+source("00_CommonFiles/DataImport.R")
+```
+
+#### Visualization: Change in size and time to molt
+
+```{r}
+# Function for carapace width plots
+plot_cw <- function(df, df_title) {
+  df <- df %>% drop_na(cw_diff, cw_percent, ttt, sex)
+
+  p1 <- ggplot(df, aes(x = ttt, y = cw_diff)) +
+    geom_boxplot() +
+    labs(title = df_title, x = "ttt", y = "Change in carapace width (mm)")
+
+  p2 <- ggplot(df, aes(x = sex, y = cw_diff)) +
+    geom_boxplot() +
+    labs(x = "sex", y = "Change in carapace width (mm)")
+
+  p3 <- ggplot(df, aes(x = ttt, y = cw_percent)) +
+    geom_boxplot() +
+    labs(x = "ttt", y = "Percent change in carapace width")
+
+  p4 <- ggplot(df, aes(x = sex, y = cw_percent)) +
+    geom_boxplot() +
+    labs(x = "sex", y = "Percent change in carapace width")
+
+  (p1 | p2) / (p3 | p4)
+}
+
+# Function for mass plots
+plot_mass <- function(df, df_title) {
+  df <- df %>% drop_na(mass_diff, mass_percent, ttt, sex)
+
+  p1 <- ggplot(df, aes(x = ttt, y = mass_diff)) +
+    geom_boxplot() +
+    labs(title = df_title, x = "ttt", y = "Change in mass (g)")
+
+  p2 <- ggplot(df, aes(x = sex, y = mass_diff)) +
+    geom_boxplot() +
+    labs(x = "sex", y = "Change in mass (g)")
+
+  p3 <- ggplot(df, aes(x = ttt, y = mass_percent)) +
+    geom_boxplot() +
+    labs(x = "ttt", y = "Percent change in mass")
+
+  p4 <- ggplot(df, aes(x = sex, y = mass_percent)) +
+    geom_boxplot() +
+    labs(x = "sex", y = "Percent change in mass")
+
+  (p1 | p2) / (p3 | p4)
+}
+
+# Function for time to molt plots
+plot_time_to_molt <- function(df, df_title) {
+  df <- df %>%
+    drop_na(time_to_molt, ttt, sex)
+
+  p1 <- ggplot(df, aes(x = ttt, y = time_to_molt)) +
+    geom_boxplot() +
+    labs(title = df_title, x = "ttt", y = "Time to molt (days)")
+
+  p2 <- ggplot(df, aes(x = sex, y = time_to_molt)) +
+    geom_boxplot() +
+    labs(x = "sex", y = "Time to molt (days)")
+
+  p1 | p2
+}
+
+# Generate plots
+plot_cw(trial1_size, "Trial 1: food")
+plot_cw(trial2_size, "Trial 2: photoperiod")
+plot_cw(trial3_size, "Trial 3: space")
+
+plot_mass(trial1_size, "Trial 1: food")
+plot_mass(trial2_size, "Trial 2: photoperiod")
+plot_mass(trial3_size, "Trial 3: space")
+
+plot_time_to_molt(trial1_ttm, "Trial 1: food")
+plot_time_to_molt(trial2_ttm, "Trial 2: photoperiod")
+plot_time_to_molt(trial3_ttm, "Trial 3: space")
+
+# Save plots
+ggsave("03_Figures/cw_diff_trial1.png", plot_cw(trial1_size, "Trial 1: food"), width = 10, height = 8, dpi = 300)
+ggsave("03_Figures/cw_diff_trial2.png", plot_cw(trial2_size, "Trial 2: photoperiod"), width = 10, height = 8, dpi = 300)
+ggsave("03_Figures/cw_diff_trial3.png", plot_cw(trial3_size, "Trial 3: space"), width = 10, height = 8, dpi = 300)
+
+ggsave("03_Figures/mass_diff_trial1.png", plot_mass(trial1_size, "Trial 1: food"), width = 10, height = 8, dpi = 300)
+ggsave("03_Figures/mass_diff_trial2.png", plot_mass(trial2_size, "Trial 2: photoperiod"), width = 10, height = 8, dpi = 300)
+ggsave("03_Figures/mass_diff_trial3.png", plot_mass(trial3_size, "Trial 3: space"), width = 10, height = 8, dpi = 300)
+
+ggsave("03_Figures/time_to_molt_trial1.png", plot_time_to_molt(trial1_ttm, "Trial 1: food"), width = 8, height = 6, dpi = 300)
+ggsave("03_Figures/time_to_molt_trial2.png", plot_time_to_molt(trial2_ttm, "Trial 2: photoperiod"), width = 8, height = 6, dpi = 300)
+ggsave("03_Figures/time_to_molt_trial3.png", plot_time_to_molt(trial3_ttm, "Trial 3: space"), width = 8, height = 6, dpi = 300)
+```
+
+#Analyses \## Check distributions and assumptions of parametric t-tools
+
+```{r}
+library(car)  # for Levene's Test
+
+# Function to check assumptions and save results
+check_assumptions <- function(data, group_var, test_vars, dataset_name) {
+  results <- list()
+  
+  for (var in test_vars) {
+    var_results <- list()
+    
+    # Normality check using by()
+    normality <- by(data[[var]], data[[group_var]], function(x) {
+      x <- na.omit(x)
+      group_name <- attr(x, "subset")
+      if (length(x) >= 3) {
+        shapiro <- shapiro.test(x)
+        return(list(group = group_name, p_value = shapiro$p.value))
+      } else {
+        return(list(group = group_name, p_value = NA, note = "Insufficient data"))
+      }
+    })
+    var_results$normality <- normality
+    
+    # Levene's Test
+    formula <- as.formula(paste(var, "~", group_var))
+    levene <- leveneTest(formula, data = data)
+    var_results$levene <- capture.output(print(levene))
+    
+    results[[var]] <- var_results
+  }
+  
+  # Prepare output text
+  output <- c(paste0("=== Assumption Checks for ", dataset_name, " ===\n"))
+  for (var in names(results)) {
+    output <- c(output, paste0("\n--- ", var, " ---\n"))
+    
+    output <- c(output, "Shapiro-Wilk Normality Test:")
+    for (res in results[[var]]$normality) {
+      if (!is.null(res$note)) {
+        output <- c(output, paste("Group:", res$group, "-", res$note))
+      } else {
+        output <- c(output, paste("Group:", res$group, "- p-value:", round(res$p_value, 5)))
+      }
+    }
+    
+    output <- c(output, "\nLevene's Test for Homogeneity of Variance:")
+    output <- c(output, results[[var]]$levene)
+  }
+  
+  return(output)
+}
+
+# Variables to test
+size_vars <- c("cw_diff", "cw_percent", "mass_diff", "mass_percent")
+ttm_var <- c("time_to_molt")
+
+# Run checks
+results1_size <- check_assumptions(trial1_size, "ttt", size_vars, "trial1_size")
+results2_size <- check_assumptions(trial2_size, "ttt", size_vars, "trial2_size")
+results3_size <- check_assumptions(trial3_size, "ttt", size_vars, "trial3_size")
+
+results1_ttm <- check_assumptions(trial1_ttm, "ttt", ttm_var, "trial1_ttm")
+results2_ttm <- check_assumptions(trial2_ttm, "ttt", ttm_var, "trial2_ttm")
+results3_ttm <- check_assumptions(trial3_ttm, "ttt", ttm_var, "trial3_ttm")
+
+# Combine all results
+all_results <- c(
+  results1_size, "\n\n", results2_size, "\n\n", results3_size, "\n\n",
+  results1_ttm, "\n\n", results2_ttm, "\n\n", results3_ttm
+)
+
+# Create output directory if it doesn't exist
+output_dir <- "02_Results"
+if (!dir.exists(output_dir)) dir.create(output_dir)
+
+# Write to file
+writeLines(all_results, file.path(output_dir, "growth_diagnostics.txt"))
+```
+
+## Change in size & time to molt
+
+```{r}
+# Function to run parametric or non-parametric tests based on assumptions
+run_mixed_tests <- function(data, group_var, test_vars, dataset_name, assumptions) {
+  results <- list()
+  
+  for (var in test_vars) {
+    df <- data[, c(group_var, var)]
+    df <- na.omit(df)
+    n_levels <- length(unique(df[[group_var]]))
+    
+    # Determine test type from assumptions
+    use_parametric <- assumptions[[dataset_name]][[var]]$parametric
+    
+    if (n_levels < 2) {
+      test_output <- "Not enough groups to run test"
+    } else if (use_parametric) {
+      if (n_levels == 2) {
+        test <- t.test(as.formula(paste(var, "~", group_var)), data = df)
+        test_output <- capture.output(print(test))
+      } else {
+        test <- aov(as.formula(paste(var, "~", group_var)), data = df)
+        test_output <- capture.output(summary(test))
+      }
+      header <- paste0("--- ", var, " (Parametric) ---")
+    } else {
+      if (n_levels == 2) {
+        test <- wilcox.test(as.formula(paste(var, "~", group_var)), data = df)
+      } else {
+        test <- kruskal.test(as.formula(paste(var, "~", group_var)), data = df)
+      }
+      test_output <- capture.output(print(test))
+      header <- paste0("--- ", var, " (Non-Parametric) ---")
+    }
+    
+    results[[var]] <- c(header, test_output)
+  }
+  
+  output <- c(paste0("=== Test Results for ", dataset_name, " ===\n"))
+  for (var in names(results)) {
+    output <- c(output, results[[var]])
+  }
+  return(output)
+}
+
+# Define which variables meet parametric assumptions
+assumptions <- list(
+  trial1_size = list(
+    cw_diff = list(parametric = FALSE),
+    cw_percent = list(parametric = TRUE),
+    mass_diff = list(parametric = FALSE),
+    mass_percent = list(parametric = FALSE)
+  ),
+  trial2_size = list(
+    cw_diff = list(parametric = TRUE),
+    cw_percent = list(parametric = TRUE),
+    mass_diff = list(parametric = FALSE),
+    mass_percent = list(parametric = FALSE)
+  ),
+  trial3_size = list(
+    cw_diff = list(parametric = FALSE),
+    cw_percent = list(parametric = FALSE),
+    mass_diff = list(parametric = TRUE),
+    mass_percent = list(parametric = TRUE)
+  ),
+  trial1_ttm = list(time_to_molt = list(parametric = TRUE)),
+  trial2_ttm = list(time_to_molt = list(parametric = FALSE)),
+  trial3_ttm = list(time_to_molt = list(parametric = TRUE))
+)
+
+# Variables to test
+size_vars <- c("cw_diff", "cw_percent", "mass_diff", "mass_percent")
+ttm_var <- c("time_to_molt")
+
+# Run tests and collect results
+results1_size <- run_mixed_tests(trial1_size, "ttt", size_vars, "trial1_size", assumptions)
+results2_size <- run_mixed_tests(trial2_size, "ttt", size_vars, "trial2_size", assumptions)
+results3_size <- run_mixed_tests(trial3_size, "ttt", size_vars, "trial3_size", assumptions)
+
+results1_ttm <- run_mixed_tests(trial1_ttm, "ttt", ttm_var, "trial1_ttm", assumptions)
+results2_ttm <- run_mixed_tests(trial2_ttm, "ttt", ttm_var, "trial2_ttm", assumptions)
+results3_ttm <- run_mixed_tests(trial3_ttm, "ttt", ttm_var, "trial3_ttm", assumptions)
+
+# Combine all results
+all_results <- c(
+  results1_size, "\n\n", results2_size, "\n\n", results3_size, "\n\n",
+  results1_ttm, "\n\n", results2_ttm, "\n\n", results3_ttm
+)
+
+# Create output directory if it doesn't exist
+output_dir <- "02_Results"
+if (!dir.exists(output_dir)) dir.create(output_dir)
+
+# Write to file
+writeLines(all_results, file.path(output_dir, "growth_results.txt"))
+```

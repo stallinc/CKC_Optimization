@@ -1,0 +1,180 @@
+---
+title: "Expt1_food"
+format: html
+editor_options: 
+  chunk_output_type: console
+---
+
+# Project information
+
+Title: Optimization of grow‐out culture of Caribbean king crab: experiment 1 (food)
+Funder: Gulf States Marine Fisheries Commission 
+Award number: NA20NMF4540293 (subcontract ACQ-210-039-2023-USF)
+
+PI(s): Christopher Stallings and Fredrick Stengard
+
+Code developer(s): Christopher Stallings and Fredrick Stengard 
+Origination Date: 2025-05-16
+
+# Packages and parameters
+```{r}
+# Load required packages
+library(tidyverse)  # for data manipulation and visualization
+library(patchwork) # for arranging plots
+
+# Import data
+source("00_CommonFiles/DataImport.R")
+```
+
+# Visualization
+## Change in size
+```{r}
+
+# Function for carapace width plots
+plot_cw <- function(df, df_title) {
+  df <- df %>% drop_na(cw_diff, cw_percent, ttt, sex)
+
+  p1 <- ggplot(df, aes(x = ttt, y = cw_diff)) +
+    geom_boxplot() +
+    labs(title = df_title, x = "ttt", y = "Change in carapace width (mm)")
+
+  p2 <- ggplot(df, aes(x = sex, y = cw_diff)) +
+    geom_boxplot() +
+    labs(title = df_title, x = "sex", y = "Change in carapace width (mm)")
+
+  p3 <- ggplot(df, aes(x = ttt, y = cw_percent)) +
+    geom_boxplot() +
+    labs(title = df_title, x = "ttt", y = "Percent change in carapace width")
+
+  p4 <- ggplot(df, aes(x = sex, y = cw_percent)) +
+    geom_boxplot() +
+    labs(title = df_title, x = "sex", y = "Percent change in carapace width")
+
+  (p1 | p2) / (p3 | p4)
+}
+
+# Function for mass plots
+plot_mass <- function(df, df_title) {
+  df <- df %>% drop_na(mass_diff, mass_percent, ttt, sex)
+
+  p1 <- ggplot(df, aes(x = ttt, y = mass_diff)) +
+    geom_boxplot() +
+    labs(title = df_title, x = "ttt", y = "Change in mass (g)")
+
+  p2 <- ggplot(df, aes(x = sex, y = mass_diff)) +
+    geom_boxplot() +
+    labs(title = df_title, x = "sex", y = "Change in mass (g)")
+
+  p3 <- ggplot(df, aes(x = ttt, y = mass_percent)) +
+    geom_boxplot() +
+    labs(title = df_title, x = "ttt", y = "Percent change in mass")
+
+  p4 <- ggplot(df, aes(x = sex, y = mass_percent)) +
+    geom_boxplot() +
+    labs(title = df_title, x = "sex", y = "Percent change in mass")
+
+  (p1 | p2) / (p3 | p4)
+}
+
+# Carapace width plots
+plot_cw(dat_expt1, "Experiment 1: food")
+plot_cw(dat_expt2, "Experiment 2: photoperiod")
+plot_cw(dat_expt3, "Experiment 3: space")
+
+# Mass plots
+plot_mass(dat_expt1, "Experiment 1: food")
+plot_mass(dat_expt2, "Experiment 2: photoperiod")
+plot_mass(dat_expt3, "Experiment 3: space")
+
+```
+
+## Proportion molt
+```{r}
+
+# Function to plot molt proportions by treatment
+plot_molt_by_ttt <- function(df, df_title) {
+  df <- df %>% drop_na(molt, ttt)
+
+  ggplot(df, aes(x = ttt, y = molt)) +
+    stat_summary(fun = mean, geom = "bar", fill = "darkgreen") +
+    stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.2) +
+    labs(
+      title = df_title,
+      x = "Treatment",
+      y = "Proportion molted"
+    ) +
+    ylim(0, 1)
+}
+
+# Generate and display plots for each dataset
+plot_molt_by_ttt(dat_expt1, "Experiment 1: food")
+plot_molt_by_ttt(dat_expt2, "Experiment 2: photoperiod")
+plot_molt_by_ttt(dat_expt3, "Experiment 3: space")
+
+
+```
+
+# Analyses
+## Check distributions and assumptions of t-tools
+```{r}
+library(tidyverse)
+library(car)
+
+# Helper function to run Shapiro-Wilk and Levene's test
+check_assumptions <- function(df, var) {
+  cat("\n---", var, "---\n")
+  print(shapiro.test(df[[var]]))
+  print(leveneTest(as.formula(paste(var, "~ ttt")), data = df))
+}
+
+# Helper function to run t-test or ANOVA
+run_test <- function(df, var) {
+  if (n_distinct(df$ttt) == 2) {
+    print(t.test(as.formula(paste(var, "~ ttt")), data = df))
+  } else {
+    print(summary(aov(as.formula(paste(var, "~ ttt")), data = df)))
+  }
+}
+
+# Variables to test
+vars <- c("cw_diff", "cw_percent", "mass_diff", "mass_percent")
+
+# dat_expt1: t-tests
+df1 <- dat_expt1 %>% drop_na(ttt, cw_diff, cw_percent, mass_diff, mass_percent)
+cat("=== Experiment 1: food ===\n")
+for (v in vars) {
+  check_assumptions(df1, v)
+  run_test(df1, v)
+}
+
+# dat_expt2: ANOVAs
+df2 <- dat_expt2 %>% drop_na(ttt, cw_diff, cw_percent, mass_diff, mass_percent)
+cat("\n=== Experiment 2: photoperiod ===\n")
+for (v in vars) {
+  check_assumptions(df2, v)
+  run_test(df2, v)
+}
+
+# dat_expt3: ANOVAs
+df3 <- dat_expt3 %>% drop_na(ttt, cw_diff, cw_percent, mass_diff, mass_percent)
+cat("\n=== Experiment 3: space ===\n")
+for (v in vars) {
+  check_assumptions(df3, v)
+  run_test(df3, v)
+}
+
+```
+
+## Assumptions take 2
+```{r}
+
+```
+## Change in size
+```{r}
+
+```
+
+## Proportion molt
+```{r}
+
+```

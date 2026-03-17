@@ -1,0 +1,112 @@
+=== Non-Parametric Test Results for dat_expt1 ===
+
+
+--- cw_diff ---
+
+	Wilcoxon rank sum test with continuity correction
+
+data:  cw_diff by ttt
+W = 166, p-value = 0.1071
+alternative hypothesis: true location shift is not equal to 0
+
+
+--- cw_percent ---
+
+	Wilcoxon rank sum exact test
+
+data:  cw_percent by ttt
+W = 171, p-value = 0.1369
+alternative hypothesis: true location shift is not equal to 0
+
+
+--- mass_diff ---
+
+	Wilcoxon rank sum exact test
+
+data:  mass_diff by ttt
+W = 76, p-value = 0.03209
+alternative hypothesis: true location shift is not equal to 0
+
+
+--- mass_percent ---
+
+	Wilcoxon rank sum exact test
+
+data:  mass_percent by ttt
+W = 90, p-value = 0.1037
+alternative hypothesis: true location shift is not equal to 0
+
+
+
+
+=== Non-Parametric Test Results for dat_expt2 ===
+
+
+--- cw_diff ---
+
+	Kruskal-Wallis rank sum test
+
+data:  cw_diff by ttt
+Kruskal-Wallis chi-squared = 1.5421, df = 2, p-value = 0.4625
+
+
+--- cw_percent ---
+
+	Kruskal-Wallis rank sum test
+
+data:  cw_percent by ttt
+Kruskal-Wallis chi-squared = 1.0368, df = 2, p-value = 0.5955
+
+
+--- mass_diff ---
+
+	Kruskal-Wallis rank sum test
+
+data:  mass_diff by ttt
+Kruskal-Wallis chi-squared = 2.104, df = 2, p-value = 0.3492
+
+
+--- mass_percent ---
+
+	Kruskal-Wallis rank sum test
+
+data:  mass_percent by ttt
+Kruskal-Wallis chi-squared = 1.39, df = 2, p-value = 0.4991
+
+
+
+
+=== Non-Parametric Test Results for dat_expt3 ===
+
+
+--- cw_diff ---
+
+	Kruskal-Wallis rank sum test
+
+data:  cw_diff by ttt
+Kruskal-Wallis chi-squared = 0.71436, df = 2, p-value = 0.6996
+
+
+--- cw_percent ---
+
+	Kruskal-Wallis rank sum test
+
+data:  cw_percent by ttt
+Kruskal-Wallis chi-squared = 1.2579, df = 2, p-value = 0.5331
+
+
+--- mass_diff ---
+
+	Kruskal-Wallis rank sum test
+
+data:  mass_diff by ttt
+Kruskal-Wallis chi-squared = 0.94943, df = 2, p-value = 0.6221
+
+
+--- mass_percent ---
+
+	Kruskal-Wallis rank sum test
+
+data:  mass_percent by ttt
+Kruskal-Wallis chi-squared = 0.03659, df = 2, p-value = 0.9819
+

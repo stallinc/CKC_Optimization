@@ -1,0 +1,10 @@
+method,ttt,n,molters,prop
+date,A,9,9,1
+flag,A,9,0,0
+flag_or_date,A,9,9,1
+date,B,13,13,1
+flag,B,13,0,0
+flag_or_date,B,13,13,1
+date,C,12,12,1
+flag,C,12,0,0
+flag_or_date,C,12,12,1

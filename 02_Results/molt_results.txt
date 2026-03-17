@@ -1,0 +1,133 @@
+=== Logistic Regression Results for dat_expt1 ===
+
+
+--- Model Summary ---
+
+Call:
+glm(formula = molt ~ ttt, family = binomial, data = df)
+
+Coefficients:
+            Estimate Std. Error z value Pr(>|z|)   
+(Intercept)  -0.2076     0.3734  -0.556  0.57815   
+tttB          2.5590     0.8289   3.087  0.00202 **
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 67.083  on 51  degrees of freedom
+Residual deviance: 53.482  on 50  degrees of freedom
+AIC: 57.482
+
+Number of Fisher Scoring iterations: 5
+
+
+--- Odds Ratios ---
+(Intercept)        tttB 
+    0.81250    12.92308 
+
+--- Likelihood Ratio Test (ANOVA) ---
+Analysis of Deviance Table
+
+Model: binomial, link: logit
+
+Response: molt
+
+Terms added sequentially (first to last)
+
+
+     Df Deviance Resid. Df Resid. Dev Pr(>Chi)    
+NULL                    51     67.083             
+ttt   1   13.602        50     53.482 0.000226 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+
+=== Logistic Regression Results for dat_expt2 ===
+
+
+--- Model Summary ---
+
+Call:
+glm(formula = molt ~ ttt, family = binomial, data = df)
+
+Coefficients:
+            Estimate Std. Error z value Pr(>|z|)  
+(Intercept)   0.8938     0.3957   2.259   0.0239 *
+tttB         -0.1317     0.6051  -0.218   0.8277  
+tttC         -0.9584     0.5345  -1.793   0.0730 .
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 111.64  on 83  degrees of freedom
+Residual deviance: 107.82  on 81  degrees of freedom
+AIC: 113.82
+
+Number of Fisher Scoring iterations: 4
+
+
+--- Odds Ratios ---
+(Intercept)        tttB        tttC 
+  2.4444444   0.8766234   0.3835227 
+
+--- Likelihood Ratio Test (ANOVA) ---
+Analysis of Deviance Table
+
+Model: binomial, link: logit
+
+Response: molt
+
+Terms added sequentially (first to last)
+
+
+     Df Deviance Resid. Df Resid. Dev Pr(>Chi)
+NULL                    83     111.64         
+ttt   2    3.825        81     107.82   0.1477
+
+
+
+=== Logistic Regression Results for dat_expt3 ===
+
+
+--- Model Summary ---
+
+Call:
+glm(formula = molt ~ ttt, family = binomial, data = df)
+
+Coefficients:
+            Estimate Std. Error z value Pr(>|z|)  
+(Intercept)    2.485      1.041   2.387    0.017 *
+tttA          -1.897      1.181  -1.607    0.108  
+tttC          -1.281      1.232  -1.040    0.298  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 42.653  on 39  degrees of freedom
+Residual deviance: 39.345  on 37  degrees of freedom
+AIC: 45.345
+
+Number of Fisher Scoring iterations: 5
+
+
+--- Odds Ratios ---
+(Intercept)        tttA        tttC 
+ 12.0000000   0.1500000   0.2777778 
+
+--- Likelihood Ratio Test (ANOVA) ---
+Analysis of Deviance Table
+
+Model: binomial, link: logit
+
+Response: molt
+
+Terms added sequentially (first to last)
+
+
+     Df Deviance Resid. Df Resid. Dev Pr(>Chi)
+NULL                    39     42.653         
+ttt   2   3.3077        37     39.345   0.1913

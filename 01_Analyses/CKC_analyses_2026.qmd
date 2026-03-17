@@ -31,6 +31,209 @@ source("00_CommonFiles/DataImport.R")
 ```
 
 # Visualization
+## Manuscript figs - 4-panel summary figures 
+```{r}
+
+# Helper to trim while preserving NA (avoids turning NA -> "NA")
+to_chr <- function(x) ifelse(is.na(x), NA_character_, trimws(as.character(x)))
+
+# ---- 4-panel figure builder (B/W aesthetics), NA-safe ----
+four_panel_summary_bw <- function(size_df, ttm_df, molt_df) {
+
+  # 1) Canonical treatment levels from SIZE (non-missing only)
+  lvls <- size_df %>%
+    mutate(ttt = to_chr(ttt)) %>%
+    pull(ttt) %>%
+    unique() %>%
+    na.omit() %>%
+    as.character()
+
+  # 2) Harmonize 'ttt' in all inputs (preserve NA, then set factor levels)
+  size_df <- size_df %>%
+    mutate(ttt = factor(to_chr(ttt), levels = lvls))
+
+  ttm_df  <- ttm_df %>%
+    mutate(ttt = factor(to_chr(ttt), levels = lvls))
+
+  molt_df <- molt_df %>%
+    mutate(
+      ttt  = factor(to_chr(ttt), levels = lvls),
+      molt = suppressWarnings(as.integer(molt))
+    )
+
+  # ---- A) Proportion molted (POINT + CI as line; no caps; all black) ----
+  # Drop rows with NA in either molt or ttt
+  p_molt <- molt_df %>%
+    filter(!is.na(molt), !is.na(ttt)) %>%
+    ggplot(aes(x = ttt, y = molt)) +
+    stat_summary(fun = mean, geom = "point", size = 3, color = "black") +
+    stat_summary(fun.data = mean_cl_boot, geom = "errorbar",
+                 width = 0, color = "black") +
+    labs(x = "Treatment", y = "Proportion molted") +
+    coord_cartesian(ylim = c(0, 1)) +
+    theme_bw(base_size = 16) +
+    theme(
+      panel.grid.minor = element_blank(),
+      axis.title = element_text(size = 16),
+      axis.text  = element_text(size = 14)
+    )
+
+  # Prepare TTM: exclude second molts if present, keep first time per crab
+  ttm_first <- ttm_df %>%
+    { if ("second_molt" %in% names(.)) filter(., is.na(second_molt) | second_molt == 0) else . } %>%
+    filter(!is.na(time_to_molt), !is.na(ttt)) %>%   # <- drop NA time and NA treatment
+    group_by(crabID, ttt) %>%
+    summarise(
+      time_to_molt = suppressWarnings(min(time_to_molt, na.rm = TRUE)),
+      .groups = "drop"
+    ) %>%
+    mutate(ttt = factor(ttt, levels = lvls))
+
+  # ---- B) Time to molt (white boxes, black outlines) ----
+  p_ttm <- ggplot(ttm_first, aes(x = ttt, y = time_to_molt)) +
+    geom_boxplot(fill = "white", color = "black") +
+    labs(x = "Treatment", y = "Time to molt (days)") +
+    theme_bw(base_size = 16) +
+    theme(
+      panel.grid.minor = element_blank(),
+      axis.title = element_text(size = 16),
+      axis.text  = element_text(size = 14)
+    )
+
+  # Ensure percent columns are numeric
+  size_df <- size_df %>%
+    mutate(
+      cw_percent   = readr::parse_number(as.character(cw_percent)),
+      mass_percent = readr::parse_number(as.character(mass_percent))
+    )
+
+  # ---- C) % change in carapace width (white boxes, black outlines) ----
+  p_cw <- size_df %>%
+    drop_na(cw_percent, ttt) %>%
+    ggplot(aes(x = ttt, y = cw_percent)) +
+    geom_boxplot(fill = "white", color = "black") +
+    labs(x = "Treatment", y = "Percent change in carapace width") +
+    theme_bw(base_size = 16) +
+    theme(
+      panel.grid.minor = element_blank(),
+      axis.title = element_text(size = 16),
+      axis.text  = element_text(size = 14)
+    )
+
+  # ---- D) % change in mass (white boxes, black outlines) ----
+  p_mass <- size_df %>%
+    drop_na(mass_percent, ttt) %>%
+    ggplot(aes(x = ttt, y = mass_percent)) +
+    geom_boxplot(fill = "white", color = "black") +
+    labs(x = "Treatment", y = "Percent change in mass") +
+    theme_bw(base_size = 16) +
+    theme(
+      panel.grid.minor = element_blank(),
+      axis.title = element_text(size = 16),
+      axis.text  = element_text(size = 14)
+    )
+
+  # Combine panels (no figure title)
+  (p_molt | p_ttm) / (p_cw | p_mass)
+}
+
+# ---- Build named plot objects (show in Environment) ----
+plt_expt1 <- four_panel_summary_bw(trial1_size, trial1_ttm, trial1_molt)
+plt_expt2 <- four_panel_summary_bw(trial2_size, trial2_ttm, trial2_molt)
+plt_expt3 <- four_panel_summary_bw(trial3_size, trial3_ttm, trial3_molt)
+
+# ---- Print so they appear in the Plots pane ----
+print(plt_expt1); print(plt_expt2); print(plt_expt3)
+
+# ---- Save figures ----
+if (!dir.exists("03_Figures")) dir.create("03_Figures", recursive = TRUE)
+ggsave("03_Figures/summary_4panel_expt1.png", plt_expt1, width = 10, height = 8, dpi = 300)
+ggsave("03_Figures/summary_4panel_expt2.png", plt_expt2, width = 10, height = 8, dpi = 300)
+ggsave("03_Figures/summary_4panel_expt3.png", plt_expt3, width = 10, height = 8, dpi = 300)
+```
+
+## Manuscript figs - 6-panel sex figures 
+```{r}
+# ---- Aesthetics ----
+theme_bw_big <- function() {
+  theme_bw(base_size = 16) +
+    theme(
+      panel.grid.minor = element_blank(),
+      axis.title = element_text(size = 16),
+      axis.text  = element_text(size = 14)
+    )
+}
+
+# ---- One row (2 panels) built from molt_df + ttm_df ----
+# Assumes molt_df is curated: one row per crab, columns: crabID, sex, molt (0/1)
+row_two_panels_by_sex_from_molt <- function(molt_df, ttm_df, row_label = "Trial") {
+  # Harmonize sex levels from molt_df (authoritative for Sex & denominator)
+  sex_lvls <- levels(factor(trimws(as.character(molt_df$sex))))
+
+  molt1 <- molt_df %>%
+    mutate(
+      crabID = trimws(as.character(crabID)),
+      sex    = factor(trimws(as.character(sex)), levels = sex_lvls),
+      molt   = suppressWarnings(as.integer(molt))
+    ) %>%
+    drop_na(sex, molt)
+
+  # A) Proportion molted by Sex (identical logic to your 4-panel, just x = sex)
+  p_molt <- ggplot(molt1, aes(x = sex, y = molt)) +
+    stat_summary(fun = mean, geom = "point", size = 3, color = "black") +
+    stat_summary(fun.data = mean_cl_boot, geom = "errorbar",
+                 width = 0, color = "black") +
+    labs(x = "Sex", y = "Proportion molted") +
+    coord_cartesian(ylim = c(0, 1)) +
+    theme_bw_big() +
+    ggtitle(row_label)
+
+  # Build Sex key from molt_df for consistent labeling in TTM
+  sex_key <- molt1 %>%
+    transmute(crabID, sex) %>%
+    distinct(crabID, .keep_all = TRUE)
+
+  # First/earliest time-to-molt per crab (drop second molts if present)
+  ttm_first <- ttm_df %>%
+    mutate(crabID = trimws(as.character(crabID))) %>%
+    { if ("second_molt" %in% names(.)) filter(., is.na(second_molt) | second_molt == 0) else . } %>%
+    filter(!is.na(time_to_molt)) %>%
+    group_by(crabID) %>%
+    summarise(time_to_molt = suppressWarnings(min(time_to_molt, na.rm = TRUE)),
+              .groups = "drop") %>%
+    left_join(sex_key, by = "crabID") %>%
+    filter(!is.na(sex)) %>%
+    mutate(sex = factor(sex, levels = sex_lvls))
+
+  # B) Time to molt by Sex (white boxes, black outline)
+  p_ttm <- ggplot(ttm_first, aes(x = sex, y = time_to_molt)) +
+    geom_boxplot(fill = "white", color = "black") +
+    labs(x = "Sex", y = "Time to molt (days)") +
+    theme_bw_big()
+
+  p_molt | p_ttm
+}
+
+# ---- Build rows using your existing trial data frames ----
+row1 <- row_two_panels_by_sex_from_molt(trial1_molt, trial1_ttm, "Trial 1")
+row2 <- row_two_panels_by_sex_from_molt(trial2_molt, trial2_ttm, "Trial 2")
+row3 <- row_two_panels_by_sex_from_molt(trial3_molt, trial3_ttm, "Trial 3")
+
+# ---- Assemble 2-col × 3-row figure ----
+plt_sex_6panel <- row1 / row2 / row3
+
+# ---- Print & Save ----
+print(plt_sex_6panel)
+if (!dir.exists("03_Figures")) dir.create("03_Figures", recursive = TRUE)
+ggsave("03_Figures/sex_6panel_molt_ttm.png",
+       plt_sex_6panel, width = 10, height = 12, dpi = 300)
+
+
+```
+
+
+
+
 ## Change in size and time to molt
 ```{r}
 # Function for carapace width plots

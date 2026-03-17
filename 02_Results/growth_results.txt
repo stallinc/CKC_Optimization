@@ -1,0 +1,117 @@
+=== Test Results for dat_expt1 ===
+
+--- cw_diff (Non-Parametric) ---
+
+	Wilcoxon rank sum test with continuity correction
+
+data:  cw_diff by ttt
+W = 77, p-value = 0.0365
+alternative hypothesis: true location shift is not equal to 0
+
+--- cw_percent (Parametric) ---
+
+	Welch Two Sample t-test
+
+data:  cw_percent by ttt
+t = -2.3935, df = 22.22, p-value = 0.02556
+alternative hypothesis: true difference in means between group A and group B is not equal to 0
+95 percent confidence interval:
+ -0.077293617 -0.005552903
+sample estimates:
+mean in group A mean in group B 
+      0.2515949       0.2930182 
+
+--- mass_diff (Non-Parametric) ---
+
+	Wilcoxon rank sum exact test
+
+data:  mass_diff by ttt
+W = 76, p-value = 0.03209
+alternative hypothesis: true location shift is not equal to 0
+
+--- mass_percent (Non-Parametric) ---
+
+	Wilcoxon rank sum exact test
+
+data:  mass_percent by ttt
+W = 141, p-value = 0.8889
+alternative hypothesis: true location shift is not equal to 0
+
+--- time_to_molt (Parametric) ---
+
+	Welch Two Sample t-test
+
+data:  time_to_molt by ttt
+t = 0.85812, df = 26.174, p-value = 0.3986
+alternative hypothesis: true difference in means between group A and group B is not equal to 0
+95 percent confidence interval:
+ -11.12114  27.06986
+sample estimates:
+mean in group A mean in group B 
+       64.30769        56.33333 
+
+
+
+
+=== Test Results for dat_expt2 ===
+
+--- cw_diff (Parametric) ---
+            Df Sum Sq Mean Sq F value Pr(>F)
+ttt          2   13.8   6.893   0.824  0.445
+Residuals   45  376.7   8.370               
+--- cw_percent (Parametric) ---
+            Df  Sum Sq  Mean Sq F value Pr(>F)
+ttt          2 0.00214 0.001072   0.379  0.687
+Residuals   45 0.12714 0.002825               
+--- mass_diff (Non-Parametric) ---
+
+	Kruskal-Wallis rank sum test
+
+data:  mass_diff by ttt
+Kruskal-Wallis chi-squared = 2.104, df = 2, p-value = 0.3492
+
+--- mass_percent (Non-Parametric) ---
+
+	Kruskal-Wallis rank sum test
+
+data:  mass_percent by ttt
+Kruskal-Wallis chi-squared = 5.3385, df = 2, p-value = 0.0693
+
+--- time_to_molt (Non-Parametric) ---
+
+	Kruskal-Wallis rank sum test
+
+data:  time_to_molt by ttt
+Kruskal-Wallis chi-squared = 0.46194, df = 2, p-value = 0.7938
+
+
+
+
+=== Test Results for dat_expt3 ===
+
+--- cw_diff (Non-Parametric) ---
+
+	Kruskal-Wallis rank sum test
+
+data:  cw_diff by ttt
+Kruskal-Wallis chi-squared = 0.71436, df = 2, p-value = 0.6996
+
+--- cw_percent (Non-Parametric) ---
+
+	Kruskal-Wallis rank sum test
+
+data:  cw_percent by ttt
+Kruskal-Wallis chi-squared = 1.2579, df = 2, p-value = 0.5331
+
+--- mass_diff (Parametric) ---
+            Df Sum Sq Mean Sq F value Pr(>F)
+ttt          2    455   227.5   0.526  0.597
+Residuals   26  11246   432.6               
+--- mass_percent (Parametric) ---
+            Df   Sum Sq   Mean Sq F value Pr(>F)
+ttt          2 4.13e-05 2.065e-05   0.939  0.404
+Residuals   26 5.72e-04 2.200e-05               
+--- time_to_molt (Parametric) ---
+            Df Sum Sq Mean Sq F value Pr(>F)
+ttt          2    235   117.7   0.577  0.568
+Residuals   28   5712   204.0               

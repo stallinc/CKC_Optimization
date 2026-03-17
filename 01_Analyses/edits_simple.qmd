@@ -1,0 +1,261 @@
+---
+  title: "Caribbean king crab optimization analyses"
+format: html
+editor_options: 
+  chunk_output_type: console
+---
+
+\# Project information
+
+Title: Optimization of grow‐out culture of Caribbean king crab Funder: Gulf States Marine Fisheries Commission Award number: NA20NMF4540293 (subcontract ACQ-210-039-2023-USF)
+
+PI(s): Christopher Stallings and Fredrick Stengard
+
+Code developer(s): Christopher Stallings Origination Date: 2025-08-05
+
+# Packages and parameters
+
+```{r}
+# Load required packages
+library(tidyverse)  # for data manipulation and visualization
+library(patchwork) # for arranging plots
+library(dplyr) # for data manipulation
+library(car) # for Levene's Test
+library(ResourceSelection)  # for Hosmer-Lemeshow test
+library(pscl)               # for pseudo R²
+library(pROC)               # for ROC curve and AUC
+library(ggplot2)
+library(readr)
+
+# Set working directory
+setwd("C:/Users/stallings/Box/1-Professional/Students/1a - Active Fish Lab/2. Stengard/1. Stengard_SWC/Funding/SCMFC 2022/CKC_Experiments")
+
+# Import size data frames
+size1 <- read_csv("00_CommonFiles/Data/trial1_size.csv")
+size2 <- read_csv("00_CommonFiles/Data/trial2_size.csv")
+size3 <- read_csv("00_CommonFiles/Data/trial3_size.csv")
+
+# Import ttm data frames
+ttm1 <- read_csv("00_CommonFiles/Data/trial1_ttm.csv")
+ttm2 <- read_csv("00_CommonFiles/Data/trial2_ttm.csv")
+ttm3 <- read_csv("00_CommonFiles/Data/trial3_ttm.csv")
+```
+```{r}
+# Panel 1: cw_diff grouped by ttt
+p1 <- ggplot(size1, aes(x = ttt, y = cw_diff)) +
+  geom_boxplot() +
+  ylab("Change in carapace width (mm)")
+
+# Panel 2: cw_diff grouped by sex
+p2 <- ggplot(size1, aes(x = sex, y = cw_diff)) +
+  geom_boxplot() +
+  ylab("Change in carapace width (mm)")
+
+# Panel 3: cw_percent grouped by ttt
+p3 <- ggplot(size1, aes(x = ttt, y = cw_percent)) +
+  geom_boxplot() +
+  ylab("Percent change in carapace width")
+
+# Panel 4: cw_percent grouped by sex
+p4 <- ggplot(size1, aes(x = sex, y = cw_percent)) +
+  geom_boxplot() +
+  ylab("Percent change in carapace width")
+
+# Combine panels and save
+trial1_cw <- (p1 | p2) / (p3 | p4)
+
+
+# Save the plot
+ggsave("trial1_cw.png", plot = trial1_cw, width = 10, height = 8, dpi = 300)
+```
+
+```{r}
+# Panel 1: mass_diff grouped by ttt
+p1 <- ggplot(size1, aes(x = ttt, y = mass_diff)) +
+  geom_boxplot() +
+  ylab("Change in mass (g)")
+
+# Panel 2: mass_diff grouped by sex
+p2 <- ggplot(size1, aes(x = sex, y = mass_diff)) +
+  geom_boxplot() +
+  ylab("Change in mass (g)")
+
+# Panel 3: mass_percent grouped by ttt
+p3 <- ggplot(size1, aes(x = ttt, y = mass_percent)) +
+  geom_boxplot() +
+  ylab("Percent change in mass")
+
+# Panel 4: mass_percent grouped by sex
+p4 <- ggplot(size1, aes(x = sex, y = mass_percent)) +
+  geom_boxplot() +
+  ylab("Percent change in mass")
+
+# Combine panels and assign to object
+trial1_mass <- (p1 | p2) / (p3 | p4)
+
+# Save the plot
+ggsave("trial1_mass.png", plot = trial1_mass, width = 10, height = 8, dpi = 300)
+
+```
+```{r}
+# Convert relevant columns to numeric
+size2$cw_diff <- as.numeric(size2$cw_diff)
+size2$cw_percent <- as.numeric(size2$cw_percent)
+size2$mass_diff <- as.numeric(size2$mass_diff)
+size2$mass_percent <- as.numeric(size2$mass_percent)
+
+# Remove rows with NA values
+size2_clean <- na.omit(size2)
+
+# --- Carapace width boxplots ---
+p1_cw <- ggplot(size2_clean, aes(x = ttt, y = cw_diff)) +
+  geom_boxplot() +
+  ylab("Change in carapace width (mm)")
+
+p2_cw <- ggplot(size2_clean, aes(x = sex, y = cw_diff)) +
+  geom_boxplot() +
+  ylab("Change in carapace width (mm)")
+
+p3_cw <- ggplot(size2_clean, aes(x = ttt, y = cw_percent)) +
+  geom_boxplot() +
+  ylab("Percent change in carapace width")
+
+p4_cw <- ggplot(size2_clean, aes(x = sex, y = cw_percent)) +
+  geom_boxplot() +
+  ylab("Percent change in carapace width")
+
+trial2_cw <- (p1_cw | p2_cw) / (p3_cw | p4_cw)
+ggsave("trial2_cw.png", plot = trial2_cw, width = 10, height = 8, dpi = 300)
+
+
+# --- Mass boxplots ---
+p1_mass <- ggplot(size2_clean, aes(x = ttt, y = mass_diff)) +
+  geom_boxplot() +
+  ylab("Change in mass (g)")
+
+p2_mass <- ggplot(size2_clean, aes(x = sex, y = mass_diff)) +
+  geom_boxplot() +
+  ylab("Change in mass (g)")
+
+p3_mass <- ggplot(size2_clean, aes(x = ttt, y = mass_percent)) +
+  geom_boxplot() +
+  ylab("Percent change in mass")
+
+p4_mass <- ggplot(size2_clean, aes(x = sex, y = mass_percent)) +
+  geom_boxplot() +
+  ylab("Percent change in mass")
+
+trial2_mass <- (p1_mass | p2_mass) / (p3_mass | p4_mass)
+ggsave("trial2_mass.png", plot = trial2_mass, width = 10, height = 8, dpi = 300)
+```
+
+```{r}
+# Convert relevant columns to numeric
+size3$cw_diff <- as.numeric(size3$cw_diff)
+size3$cw_percent <- as.numeric(size3$cw_percent)
+size3$mass_diff <- as.numeric(size3$mass_diff)
+size3$mass_percent <- as.numeric(size3$mass_percent)
+
+# Remove rows with NA values
+size3_clean <- na.omit(size3)
+
+# --- Carapace width boxplots ---
+p1_cw <- ggplot(size3_clean, aes(x = ttt, y = cw_diff)) +
+  geom_boxplot() +
+  ylab("Change in carapace width (mm)")
+
+p2_cw <- ggplot(size3_clean, aes(x = sex, y = cw_diff)) +
+  geom_boxplot() +
+  ylab("Change in carapace width (mm)")
+
+p3_cw <- ggplot(size3_clean, aes(x = ttt, y = cw_percent)) +
+  geom_boxplot() +
+  ylab("Percent change in carapace width")
+
+p4_cw <- ggplot(size3_clean, aes(x = sex, y = cw_percent)) +
+  geom_boxplot() +
+  ylab("Percent change in carapace width")
+
+trial3_cw <- (p1_cw | p2_cw) / (p3_cw | p4_cw)
+ggsave("trial3_cw.png", plot = trial3_cw, width = 10, height = 8, dpi = 300)
+
+
+# --- Mass boxplots ---
+p1_mass <- ggplot(size3_clean, aes(x = ttt, y = mass_diff)) +
+  geom_boxplot() +
+  ylab("Change in mass (g)")
+
+p2_mass <- ggplot(size3_clean, aes(x = sex, y = mass_diff)) +
+  geom_boxplot() +
+  ylab("Change in mass (g)")
+
+p3_mass <- ggplot(size3_clean, aes(x = ttt, y = mass_percent)) +
+  geom_boxplot() +
+  ylab("Percent change in mass")
+
+p4_mass <- ggplot(size3_clean, aes(x = sex, y = mass_percent)) +
+  geom_boxplot() +
+  ylab("Percent change in mass")
+
+trial3_mass <- (p1_mass | p2_mass) / (p3_mass | p4_mass)
+ggsave("trial3_mass.png", plot = trial3_mass, width = 10, height = 8, dpi = 300)
+```
+```{r}
+# Trial 1: Convert and clean
+ttm1$time_to_molt <- as.numeric(ttm1$time_to_molt)
+ttm1_clean <- na.omit(ttm1)
+
+# Create panels
+p1 <- ggplot(ttm1_clean, aes(x = ttt, y = time_to_molt)) +
+  geom_boxplot() +
+  ylab("Time to molt (days)")
+
+p2 <- ggplot(ttm1_clean, aes(x = sex, y = time_to_molt)) +
+  geom_boxplot() +
+  ylab("Time to molt (days)")
+
+# Combine and save
+trial1_ttm <- p1 | p2
+ggsave("trial1_ttm.png", plot = trial1_ttm, width = 10, height = 6, dpi = 300)
+```
+
+```{r}
+# Trial 2: Convert and clean
+ttm2$time_to_molt <- as.numeric(ttm2$time_to_molt)
+ttm2_clean <- na.omit(ttm2)
+
+# Create panels
+p1 <- ggplot(ttm2_clean, aes(x = ttt, y = time_to_molt)) +
+  geom_boxplot() +
+  ylab("Time to molt (days)")
+
+p2 <- ggplot(ttm2_clean, aes(x = sex, y = time_to_molt)) +
+  geom_boxplot() +
+  ylab("Time to molt (days)")
+
+# Combine and save
+trial2_ttm <- p1 | p2
+ggsave("trial2_ttm.png", plot = trial2_ttm, width = 10, height = 6, dpi = 300)
+```
+
+```{r}
+# Trial 3: Convert and clean
+ttm3$time_to_molt <- as.numeric(ttm3$time_to_molt)
+ttm3_clean <- na.omit(ttm3)
+
+# Create panels
+p1 <- ggplot(ttm3_clean, aes(x = ttt, y = time_to_molt)) +
+  geom_boxplot() +
+  ylab("Time to molt (days)")
+
+p2 <- ggplot(ttm3_clean, aes(x = sex, y = time_to_molt)) +
+  geom_boxplot() +
+  ylab("Time to molt (days)")
+
+# Combine and save
+trial3_ttm <- p1 | p2
+ggsave("trial3_ttm.png", plot = trial3_ttm, width = 10, height = 6, dpi = 300)
+```
+
+
+
